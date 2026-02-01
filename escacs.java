@@ -58,11 +58,10 @@ public class escacs {
                             System.out.println("Escollint els colors dels jugadors...");
                             escollirColor();
                             
-                            partidasjugades++;
                             
                         }
                         inicialitzarTauler();
-                        imprimirTauler();
+                        jugarPartida();
                         partidasjugades++;
                         respostaCorrecta = true;
                         
@@ -89,7 +88,26 @@ public class escacs {
         } while (!respostaCorrecta);
         
     }
-    
+    public void jugarPartida() {
+        while (partidaEnCurs) {
+            imprimirTauler();
+            
+            String jugadorActual = tornActual.equals("BLANQUES") ? jugadorBlanques : jugadorNegres;
+            System.out.println("Torn de " + jugadorActual + " (" + tornActual.toLowerCase() + ").");
+            
+            String moviment = demanarMoviment();
+            
+            if (moviment.equalsIgnoreCase("Abandonar")) {
+                String guanyador = tornActual.equals("BLANQUES") ? jugadorNegres : jugadorBlanques;
+                finalitzarPartida("Abandonament", guanyador);
+                break;
+            }
+            
+            if (processarMoviment(moviment)) {
+                canviarTorn();
+            }
+        }
+    }
 
 
     
@@ -116,10 +134,15 @@ public class escacs {
     }
     
     public void demanarNomsJugadors() {
-        System.out.println("Introdueix el nom del jugador 1:");
-        nomJugador1 = llegirString();
-        System.out.println("Introdueix el nom del jugador 2:");
-        nomJugador2 = llegirString();
+        try {
+            System.out.println("Introdueix el nom del jugador 1:");
+            nomJugador1 = llegirString();
+            System.out.println("Introdueix el nom del jugador 2:");
+            nomJugador2 = llegirString();
+        } catch (Exception e) {
+            System.out.println("Error en llegir els noms dels jugadors. Si us plau, torna-ho a intentar.");
+            demanarNomsJugadors(); 
+        }
         System.out.println("Els jugadors són:");
         System.out.println("Jugador 1 (blanques): " + nomJugador1);
         System.out.println("Jugador 2 (negres): " + nomJugador2);
@@ -171,7 +194,7 @@ public class escacs {
         tauler[0][0] = 't'; tauler[0][7] = 't'; // Torres
         tauler[0][1] = 'c'; tauler[0][6] = 'c'; // Cavalls
         tauler[0][2] = 'a'; tauler[0][5] = 'a'; // Alfils
-        tauler[0][3] = 'r'; // Reina (r minúscula)
+        tauler[0][3] = 'r'; // Reina 
         tauler[0][4] = 'k'; // Rei
         
         for (int i = 0; i < 8; i++) {
@@ -186,7 +209,7 @@ public class escacs {
         tauler[7][0] = 'T'; tauler[7][7] = 'T'; // Torres
         tauler[7][1] = 'C'; tauler[7][6] = 'C'; // Cavalls
         tauler[7][2] = 'A'; tauler[7][5] = 'A'; // Alfils
-        tauler[7][3] = 'R'; // Reina (R majúscula)
+        tauler[7][3] = 'R'; // Reina 
         tauler[7][4] = 'K'; // Rei
         
         // Reiniciar peces menjades i moviments
@@ -310,7 +333,22 @@ public class escacs {
         
         return new int[]{filaIndex, columna};
     }
-    
+    public String demanarMoviment() {
+        try{
+            System.out.println("Introdueix el teu moviment (format: e2 (origen) e4 (desti)) o 'Abandonar' per rendir-te:");
+            Scanner sc = new Scanner(System.in);
+            String moviment = sc.nextLine();
+            return moviment;
+        }
+        catch (Exception e) {
+            System.out.println("Error en llegir el moviment. Si us plau, torna-ho a intentar.");
+            return demanarMoviment();
+        }
+        
+    }
+    public void canviarTorn() {
+        tornActual = tornActual.equals("BLANQUES") ? "NEGRES" : "BLANQUES";
+    }
     
     public void mourePeca(int[] origen, int[] desti, String movimentText) {
         int origenFila = origen[0], origenCol = origen[1];
@@ -364,7 +402,7 @@ public class escacs {
     }
     public boolean processarMoviment(String moviment) {
         if (!validarFormatMoviment(moviment)) {
-            System.out.println("FORMAT NO VÀLID. Utilitza el format: e2 e4");
+            System.out.println("FORMAT NO VÀLID. Utilitza el format: e2 (origen) e4 (desti).");
             return false;
         }
         
@@ -453,5 +491,27 @@ public class escacs {
     }
 
 
+    public void finalitzarPartida(String motiu, String guanyador) {
+        partidaEnCurs = false;
+        System.out.println("\n=== FI DE LA PARTIDA ===");
+        System.out.println("Motiu: " + motiu);
+        System.out.println("Guanyador: " + guanyador);
+        guanyadorAnterior = guanyador;
+        
+        mostrarResumPartida();
+    }
 
+    public void mostrarResumPartida() {
+        System.out.println("\n=== RESUM DE LA PARTIDA ===");
+        System.out.println("\nMoviments de " + jugadorBlanques + " (BLANQUES):");
+        for (int i = 0; i < movimentsBlanques.size(); i++) {
+            System.out.println((i + 1) + ". " + movimentsBlanques.get(i));
+        }
+        
+        System.out.println("\nMoviments de " + jugadorNegres + " (NEGRES):");
+        for (int i = 0; i < movimentsNegres.size(); i++) {
+            System.out.println((i + 1) + ". " + movimentsNegres.get(i));
+        }
+        System.out.println();
+    }
 }
