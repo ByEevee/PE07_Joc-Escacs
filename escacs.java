@@ -108,7 +108,27 @@ public class escacs {
             }
         }
     }
-
+    public void preguntarTornarJugar() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Voleu tornar a jugar? (s/n): ");
+        String resposta = sc.nextLine().trim().toLowerCase();
+        
+        if (resposta.equals("s")) {
+            System.out.print("Voleu mantenir els mateixos jugadors? (s/n): "); // Pregunta per si cambien de jugadors per no apagar el programa i tornarlo a obrir
+            String mantenir = sc.nextLine().trim().toLowerCase();
+            
+            if (!mantenir.equals("s")) {
+                demanarNomsJugadors();
+                partidasjugades = 0;
+                guanyadorAnterior = "";
+            }
+            
+            System.out.println("Escollint els colors dels jugadors...");
+            escollirColor();
+            inicialitzarTauler();
+            jugarPartida();
+        }
+    }
 
     
     public int llegirInt() {
@@ -134,18 +154,19 @@ public class escacs {
     }
     
     public void demanarNomsJugadors() {
+        
         try {
             System.out.println("Introdueix el nom del jugador 1:");
             nomJugador1 = llegirString();
             System.out.println("Introdueix el nom del jugador 2:");
             nomJugador2 = llegirString();
+            System.out.println("Els noms dels jugadors han estat registrats.");
         } catch (Exception e) {
             System.out.println("Error en llegir els noms dels jugadors. Si us plau, torna-ho a intentar.");
             demanarNomsJugadors(); 
         }
-        System.out.println("Els jugadors són:");
-        System.out.println("Jugador 1 (blanques): " + nomJugador1);
-        System.out.println("Jugador 2 (negres): " + nomJugador2);
+    
+
     }
     public String llegirString() {
         boolean entradaCorrecta = false;
@@ -172,14 +193,26 @@ public class escacs {
 
     }
     public void escollirColor() {
-        int ordre = (int)(Math.random() * 2) + 1;
-
-        if (ordre == 1) {
-            System.out.println("Jugador 1 comença amb " + BOLD_WHITE + "BLANQUES" + RESET);
-            System.out.println("Jugador 2 comença amb " + BOLD_BLUE + "NEGRES" + RESET);
+        if (guanyadorAnterior.isEmpty()) {
+            
+            int ordre = (int)(Math.random() * 2) + 1;
+            if (ordre == 1) {
+                jugadorBlanques = nomJugador1;
+                jugadorNegres = nomJugador2;
+                System.out.println(nomJugador1 + " comença amb " + BOLD_WHITE + "BLANQUES" + RESET);
+                System.out.println(nomJugador2 + " comença amb " + BOLD_BLUE + "NEGRES" + RESET);
+            } else {
+                jugadorBlanques = nomJugador2;
+                jugadorNegres = nomJugador1;
+                System.out.println(nomJugador2 + " comença amb " + BOLD_WHITE + "BLANQUES" + RESET);
+                System.out.println(nomJugador1 + " comença amb " + BOLD_BLUE + "NEGRES" + RESET);
+            }
         } else {
-            System.out.println("Jugador 1 comença amb " + BOLD_BLUE + "NEGRES" + RESET);
-            System.out.println("Jugador 2 comença amb " + BOLD_WHITE + "BLANQUES" + RESET);
+            
+            jugadorBlanques = guanyadorAnterior;
+            jugadorNegres = guanyadorAnterior.equals(nomJugador1) ? nomJugador2 : nomJugador1;
+            System.out.println(jugadorBlanques + " (guanyador anterior) comença amb " + BOLD_WHITE + "BLANQUES" + RESET);
+            System.out.println(jugadorNegres + " comença amb " + BOLD_BLUE + "NEGRES" + RESET);
         }
     }
     
@@ -513,5 +546,7 @@ public class escacs {
             System.out.println((i + 1) + ". " + movimentsNegres.get(i));
         }
         System.out.println();
+        preguntarTornarJugar();
     }
+
 }
